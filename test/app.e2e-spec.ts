@@ -5,6 +5,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common'
 import { PrismaService } from "../src/prisma/prisma.service"
 import { describe } from "node:test"
 import { AuthDto } from "../src/auth/dto"
+import { EditUserDto } from "src/user/dto"
+import { CreateBookmarkDto, EditBookmarkDto } from "../src/bookmark/dto"
 
 
 describe("App e2e",()=>{
@@ -121,37 +123,131 @@ describe("App e2e",()=>{
 
     })
 
-    describe("Edit user",()=>{
-      // it.todo("should Edit user")
+    describe("Edit user by id",()=>{
+      it("should edit user by id",()=>{
+        const dto: EditUserDto={
+          firstName: "Truong",
+          lastName: "Quang Dung",
+          email: "quangdung0609@gmail.com"
+        }
+        return pactum.spec()
+          .patch("/users")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.firstName)
+          .expectBodyContains(dto.email)
+      })
+      
 
     })
 
   })
 
   describe("Bookmarks",()=>{
+    describe("get empty bookmarks",()=>{
+      it("should by get empty bookmark",()=>{
+        return pactum.spec()
+          .get("/bookmarks")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .expectStatus(200)
+          .expectBody([])
+      })
+    })
     describe("Create boomark",()=>{
-      // it.todo("should Create bookmark")
+      const dto: CreateBookmarkDto={
+        title: "First Bookmark",
+        link: "https://www.linkedin.com/in/tr%C6%B0%C6%A1ng-quang-d%C5%A9ng-384176193/"
+
+      }
+      it("should create bookmark",()=>{
+        return pactum.spec()
+          .post("/bookmarks")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .withBody(dto)
+          .expectStatus(201)
+          .stores("bookmarkId",'id')
+      })
 
     })
 
     describe("Get bookmarks",()=>{
-      // it.todo("should get bookmarks")
+      it("should by get  bookmark",()=>{
+        return pactum.spec()
+          .get("/bookmarks")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .expectStatus(200)
+          .expectJsonLength(1)
+      })
 
     })
 
     describe("Get bookmark by id",()=>{
-      // it.todo("should get bookmark by id")
+      it("should by get bookmark by id",()=>{
+        return pactum.spec()
+          .get("/bookmarks/{id}")
+          .withPathParams('id',"$S{bookmarkId}")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .expectStatus(200)
+          .expectBodyContains("$S{bookmarkId}")
+      })
 
     })
 
     describe("Edit bookmark by id",()=>{
-      // it.todo("should edit bookmark")
+      const dto: EditBookmarkDto={
+        description:"My linkedin page"
+      }
+      it("should create bookmark",()=>{
+        return pactum.spec()
+          .patch("/bookmarks/{id}")
+          .withPathParams('id',"$S{bookmarkId}")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .withBody(dto)
+          .expectStatus(200)
+          .expectBodyContains(dto.description)
+          .inspect()
+      })
 
     })
 
     describe("Delete bookmark by id",()=>{
-      // it.todo("should delete bookmark")
+      it("should delete bookmark",()=>{
+        return pactum.spec()
+          .delete("/bookmarks/{id}")
+          .withPathParams('id',"$S{bookmarkId}")
+          .withHeaders({
+            Authorization:'Bearer $S{userAt}'
+          })
+          .expectStatus(204)
+          .inspect()
+      })
 
+      describe("get empty bookmarks",()=>{
+        it("should by get empty bookmark",()=>{
+          return pactum.spec()
+            .get("/bookmarks")
+            .withHeaders({
+              Authorization:'Bearer $S{userAt}'
+            })
+            .expectStatus(200)
+            .expectBody([])
+            .expectJsonLength(1)
+
+        })
+      })
     })
   })
 
